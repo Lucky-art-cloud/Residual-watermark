@@ -99,19 +99,6 @@ for epoch in range(n_epochs):
     testing_correct = 0
     schedule.step()
     model.eval()
-    # '''       extract watermark         '''
-    res1 = model.conv1.weight.data
-    P1 = res1.mean(3).view(-1, 1)
-    res = ""
-    ext = Y.mm(P1).permute(1, 0)
-    ext = ext.squeeze()
-    print(ext)
-    for x in ext:
-        if x >= 0:
-            res += '1'
-        else:
-            res += '0'
-    print(hex(int(res, 2)))
     for X_test, y_test in test_loader:
         X_test = X_test.cuda()
         y_test = y_test.cuda()
@@ -126,4 +113,16 @@ for epoch in range(n_epochs):
             data_train),
         100 * testing_correct / len(
             data_test)))
+# '''       extract watermark         '''
+res1 = model.conv1.weight.data
+P1 = res1.mean(3).view(-1, 1)
+res = ""
+ext = Y.mm(P1).permute(1, 0)
+print(ext)
+for x in ext:
+    if x >= 0:
+        res += '1'
+    else:
+        res += '0'
+print(hex(int(res, 2)))
 torch.save(model.state_dict(), "model_parameter_watermark.pkl")
